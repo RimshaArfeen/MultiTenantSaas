@@ -29,7 +29,7 @@ function AuthFormContent() {
                if (hasCompany) {
                     router.push("/dashboard");
                } else {
-                    router.push("/auth/setup");
+                    router.push("/auth?mode=signup");
                }
           }
      }, [status, session, router]);

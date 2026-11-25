@@ -1,49 +1,18 @@
-
 // app/auth/setup/page.tsx
 "use client";
 
 import React, { useState, useEffect, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import type { Session } from "next-auth";
-import { refreshSession } from "../../lib/session";
-
-type ExtendedSession = Session & {
-     user: Session["user"] & {
-          companyId?: string | null;
-     };
-};
 
 function CompanySetupContent() {
      const router = useRouter();
-     const { data, status } = useSession();
-     const session = data as ExtendedSession | null;
+     const { data: session, status } = useSession();
      const [isLoading, setIsLoading] = useState(false);
      const [error, setError] = useState<string | null>(null);
      const [logoPreview, setLogoPreview] = useState<string | null>(null);
-     const [companyNameError, setCompanyNameError] = useState("");
 
-     const checkCompanyName = async (name: string) => {
-          if (name.length < 2) {
-               setCompanyNameError("Company name must be at least 2 characters");
-               return;
-          }
-
-          try {
-               const response = await fetch(`/api/company/check-name?name=${encodeURIComponent(name)}`);
-               const data = await response.json();
-
-               if (!data.available) {
-                    setCompanyNameError("This company name is already taken");
-               } else {
-                    setCompanyNameError("");
-               }
-          } catch (error) {
-               console.error("Error checking company name:", error);
-          }
-     };
-
-     // Redirect if not authenticated or if user already has a company
+     // Redirect if not authenticated or already has company
      useEffect(() => {
           if (status === "unauthenticated") {
                router.push("/auth?mode=signin");
@@ -109,14 +78,20 @@ function CompanySetupContent() {
                     throw new Error(data.error || "Failed to setup company");
                }
 
-               // If company already exists or was created successfully
                if (data.success) {
-                    // Refresh session to get updated company data
-                    await fetch("/api/auth/session?update");
-                    await refreshSession();
+                    // Refresh the session to get updated user data
+                    await fetch("/api/auth/session", {
+                         method: "GET",
+                         headers: {
+                              "Cache-Control": "no-cache",
+                         },
+                    });
+
+                    // Small delay to ensure session is updated
+                    await new Promise(resolve => setTimeout(resolve, 500));
+
                     router.push("/dashboard");
                     router.refresh();
-
                }
           } catch (err) {
                setError(err instanceof Error ? err.message : "An unexpected error occurred");
@@ -132,7 +107,7 @@ function CompanySetupContent() {
           );
      }
 
-     // If authenticated with company, show loading while redirecting
+     // Show loading while redirecting
      if (status === "authenticated" && session?.user?.companyId) {
           return (
                <div className="min-h-screen flex items-center justify-center bg-[var(--color-background)]">
@@ -215,12 +190,8 @@ function CompanySetupContent() {
                                    placeholder="Acme Corp"
                                    required
                                    disabled={isLoading}
-                                   onChange={(e) => checkCompanyName(e.target.value)}
                                    className="w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50 px-3.5 py-2.5 text-sm outline-hidden focus:border-neutral-900 dark:focus:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                               />
-                              {companyNameError && (
-                                   <p className="text-sm text-red-600 dark:text-red-400 mt-1">{companyNameError}</p>
-                              )}
                          </div>
 
                          {/* Currency */}

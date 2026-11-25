@@ -11,16 +11,16 @@ export default function HomePage() {
   const router = useRouter();
 
   // Redirect authenticated users to dashboard or setup
-  useEffect(() => {
-    if (status === "authenticated" && session) {
-      const hasCompany = (session.user as any)?.companyId || (session.user as any)?.hasCompany;
-      if (hasCompany) {
-        router.push("/dashboard");
-      } else {
-        router.push("/auth/setup");
-      }
-    }
-  }, [status, session, router]);
+  // useEffect(() => {
+  //   if (status === "authenticated" && session) {
+  //     const hasCompany = (session.user as any)?.companyId || (session.user as any)?.hasCompany;
+  //     // if (hasCompany) {
+  //     //   router.push("/dashboard");
+  //     // } else {
+  //     //   router.push("/sign-up");
+  //     // }
+  //   }
+  // }, [status, session, router]);
 
   // Show loading state
   if (status === "loading") {

@@ -27,7 +27,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body>
+      <body suppressHydrationWarning>
         {/* We need to use a client component for SessionProvider */}
         <SessionProviderWrapper session={session}>
           {children}

@@ -9,11 +9,11 @@ import {
      DocumentTextIcon,
      ArrowUpIcon,
      ArrowDownIcon,
-CircleStackIcon,
+     CircleStackIcon,
      EyeIcon,
      ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline';
-
+import { useSession } from 'next-auth/react';
 interface MetricCard {
      title: string;
      value: string | number;
@@ -33,7 +33,8 @@ interface RecentActivity {
 
 export default function HomeView() {
      const [timeRange, setTimeRange] = useState('weekly');
-
+     const { data: session } = useSession()
+     console.log("Session: ", session)
      // Metric Cards Data
      const metrics: MetricCard[] = [
           {
@@ -106,7 +107,7 @@ export default function HomeView() {
                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                          <h2 className="text-font-size-headline-lg font-bold text-text-primary">
-                              Welcome back, Jane 👋
+                              Welcome back, {session?.user?.name} 👋
                          </h2>
                          <p className="text-font-size-body text-text-muted mt-1">
                               Here's what's happening with your business today
